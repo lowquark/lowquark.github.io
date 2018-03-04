@@ -1,24 +1,33 @@
 
 name: Ring Buffer Queue
 
-regex_script: 'queue.js'
+regex_script: 'c-template/queue.js'
 
 outfiles:
+  - expression: 'API'
+    template: c-template/src/queue/queue_api.h
+    id: api_file
+
+  - expression: 'Example'
+    template: c-template/src/queue/queue_usage.c
+    id: usage_file
+
   - expression: 'FILENAME.h'
-    template: queue.h
+    template: c-template/src/queue/queue.h
     id: h_file
+
   - expression: 'FILENAME.c'
-    template: queue.c
+    template: c-template/src/queue/queue.c
     id: c_file
 
 parameters:
-  - name: Element Type
+  - name: Name
     type: text
-    default: 'MyStruct'
-    input_id: element_type
+    default: 'queue'
+    input_id: queue_name
 
-  - name: Queue Type
+  - name: Type
     type: text
-    default: 'MyStructQueue'
-    input_id: queue_type
+    default: 'int'
+    input_id: element_type
 

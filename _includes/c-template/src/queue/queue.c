@@ -7,18 +7,14 @@
 
 #define INITIAL_SIZE 32
 
-void QUEUE_METHOD(init)(QUEUE_TYPEDEF * q) {
-  q->buffer_begin = NULL;
-  q->buffer_end   = NULL;
 
-  q->getptr = NULL;
-  q->putptr = NULL;
-
-  q->size = 0;
+static void deinit_value(VALUE_TYPEDEF value) {
+  /* TODO: Cleanup the VALUE_TYPEDEF, if applicable. This function is called
+   * when values are popped from the queue, and when the queue is cleared. */
 }
 
-void QUEUE_METHOD(clear)(QUEUE_TYPEDEF * q) {
-  free(q->buffer_begin);
+
+void QUEUE_METHOD(init)(QUEUE_TYPEDEF * q) {
   q->buffer_begin = NULL;
   q->buffer_end = NULL;
   q->getptr = NULL;
@@ -26,7 +22,30 @@ void QUEUE_METHOD(clear)(QUEUE_TYPEDEF * q) {
   q->size = 0;
 }
 
-int QUEUE_METHOD(push)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF element) {
+void QUEUE_METHOD(clear)(QUEUE_TYPEDEF * q) {
+  VALUE_TYPEDEF * valptr;
+
+  free(q->buffer_begin);
+
+  /* iterate over [getptr, putptr), call deinit */
+  if(q->size) {
+    do {
+      valptr = q->getptr;
+
+      deinit_value(*valptr);
+
+      valptr ++;
+      if(valptr == q->buffer_end) {
+        valptr = q->buffer_begin;
+      }
+    } while(valptr != q->putptr);
+  }
+
+  /* clean slate */
+  QUEUE_METHOD(init)(q);
+}
+
+int QUEUE_METHOD(push)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF value) {
   VALUE_TYPEDEF * new_buffer_begin;
   VALUE_TYPEDEF * wrap_point;
   int new_buffer_size;
@@ -75,7 +94,7 @@ int QUEUE_METHOD(push)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF element) {
   }
 
   /* store at put pointer and advance */
-  *q->putptr++ = element;
+  *q->putptr++ = value;
 
   /* wrap put pointer at end */
   if(q->putptr == q->buffer_end) {
@@ -92,6 +111,8 @@ int QUEUE_METHOD(push)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF element) {
 int QUEUE_METHOD(pop)(QUEUE_TYPEDEF * q) {
   if(q->size == 0) { return 0; }
 
+  deinit_value(*q->getptr);
+
   q->getptr++;
 
   /* wrap get pointer at end */
@@ -99,21 +120,21 @@ int QUEUE_METHOD(pop)(QUEUE_TYPEDEF * q) {
     q->getptr = q->buffer_begin;
   }
 
-  /* decrement size */
+  /* keep track of size */
   q->size --;
 
   return 1;
 }
 
-int QUEUE_METHOD(peek)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF * element_out) {
+int QUEUE_METHOD(peek)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF * value_out) {
   if(q->size == 0) { return 0; }
 
-  *element_out = *q->getptr;
+  *value_out = *q->getptr;
 
   return 1;
 }
 
-int QUEUE_METHOD(at)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF * element_out, int idx) {
+int QUEUE_METHOD(at)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF * value_out, int idx) {
   VALUE_TYPEDEF * elem_ptr;
 
   if(idx < 0) { return 0; }
@@ -126,7 +147,7 @@ int QUEUE_METHOD(at)(QUEUE_TYPEDEF * q, VALUE_TYPEDEF * element_out, int idx) {
     elem_ptr -= q->buffer_end - q->buffer_begin;
   }
 
-  *element_out = *elem_ptr;
+  *value_out = *elem_ptr;
 
   return 1;
 }

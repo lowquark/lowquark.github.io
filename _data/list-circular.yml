@@ -1,24 +1,33 @@
 
 name: Circular List
 
-regex_script: 'list.js'
+regex_script: 'c-template/list.js'
 
 outfiles:
+  - expression: 'API'
+    template: c-template/src/list/list_api.h
+    id: api_file
+
+  - expression: 'Example'
+    template: c-template/src/list/list_usage.c
+    id: usage_file
+
   - expression: 'FILENAME.h'
-    template: list.h
+    template: c-template/src/list/list.h
     id: h_file
+
   - expression: 'FILENAME.c'
-    template: list.c
+    template: c-template/src/list/list.c
     id: c_file
 
 parameters:
-  - name: Element Type
+  - name: Name
     type: text
-    default: 'MyStruct'
-    input_id: element_type
+    default: 'list'
+    input_id: list_name
 
-  - name: List Type (Base)
+  - name: Type
     type: text
-    default: 'MyStructList'
-    input_id: list_type
+    default: 'int'
+    input_id: element_type
 
