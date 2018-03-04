@@ -36,13 +36,13 @@ function typedef_ify(name, style) {
 }
 
 function process_string(str, inputs, style) {
-  if(inputs.list_type) {
-    var list_type = inputs.list_type;
+  if(inputs.queue_type) {
+    var queue_type = inputs.queue_type;
 
-    replace['INCLUDE_GUARD'] = list_type.toUpperCase();
-    replace['FILENAME']      = list_type;
+    replace['INCLUDE_GUARD'] = queue_type.toUpperCase();
+    replace['FILENAME']      = queue_type;
 
-    replace['QUEUE_STRUCT']   = list_type;
+    replace['QUEUE_STRUCT']   = queue_type;
     replace['QUEUE_TYPEDEF']  = typedef_ify(replace['QUEUE_STRUCT'], style);
 
     replace['QUEUE_METHOD']   = function(str) {
@@ -50,7 +50,7 @@ function process_string(str, inputs, style) {
       var match = args_regexp.exec(str);
       if(match[1]) {
         var words = match[1].split(',');
-        words.unshift(list_type);
+        words.unshift(queue_type);
         return concat(words, style)
       }
       return unhandled;

@@ -17,8 +17,8 @@ parameters:
     default: 'MyStruct'
     input_id: element_type
 
-  - name: List Type (Base)
+  - name: Queue Type
     type: text
-    default: 'MyStructList'
-    input_id: list_type
+    default: 'MyStructQueue'
+    input_id: queue_type
 
