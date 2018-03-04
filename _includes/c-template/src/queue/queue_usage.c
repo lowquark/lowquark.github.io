@@ -1,21 +1,30 @@
 #include "FILENAME.h"
 
-QUEUE_TYPEDEF queue;
+int i;
 VALUE_TYPEDEF value;
+QUEUE_TYPEDEF queue;
 
+/* initialize queue */
 QUEUE_METHOD(init)(&queue);
 
 /* enqueue values */
 for(i = 0 ; i < 10 ; i ++) {
-  QUEUE_METHOD(push)(&queue, value);
+  VALUE_TYPEDEF new_value;
+
+  /* ... */
+
+  /* place in queue */
+  QUEUE_METHOD(push)(&queue, new_value);
 }
 
 /* examine first element */
-QUEUE_METHOD(peek)(&queue, &value);
+if(QUEUE_METHOD(peek)(&queue, &value)) {
+  /* ... */
+}
 
 /* iterate over all values */
 for(i = 0 ; QUEUE_METHOD(at)(&queue, &value, i) ; i ++) {
-  /* do something with value... */
+  /* ... */
 }
 
 /* clear values */

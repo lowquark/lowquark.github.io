@@ -14,6 +14,33 @@
     input {
       font-family: monospace;
     }
+    .outfile-widget h3 {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      float: left;
+    }
+    .outfile-widget button {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      float: right;
+    }
+    .outfile-widget .clear {
+      clear: both;
+      padding-bottom: 10px;
+    }
+    .outfile-widget pre {
+      margin: 0px;
+      padding: 0px;
+      overflow-y: scroll;
+      max-height: 500px;
+      border: 1px solid gray;
+    }
+    .outfile-widget {
+      margin: 0px;
+      padding: 0px;
+      padding-top: 10px;
+      padding-bottom: 20px;
+    }
   </style>
 
   <script>
@@ -24,6 +51,17 @@
     sources["{{ outfile.id }}"] = {{ code | jsonify }};
     {% endfor %}
 
+    var template_data = {{ include.data | jsonify }};
+    var outfiles = template_data.outfiles;
+    var parameters = template_data.parameters;
+
+    var input_setters = [];
+    var template_outputs = [];
+
+    var input_sense = [];
+
+    var update;
+
     function escapeHtml(unsafe) {
       return unsafe
         .replace(/&/g, "&amp;")
@@ -33,21 +71,49 @@
         .replace(/'/g, "&#039;");
     }
 
+    function addTemplatedElement(elem, initial) {
+      var sink = {}
+      sink.initial = initial;
+      sink.set = function(str) { elem.innerHTML = str; }
+      template_outputs.push(sink);
+    }
+
+    function createOutfileWidget(title, content) {
+      var div_elem             = document.createElement('div');
+      var  h3_elem             = document.createElement('h3');
+      var  select_button_elem  = document.createElement('button');
+      var  div_clear_elem      = document.createElement('div');
+      var  pre_elem            = document.createElement('pre');
+      var   code_elem          = document.createElement('code');
+
+      // attributes / content
+      div_elem.className = 'outfile-widget';
+
+      div_clear_elem.className = 'clear';
+
+      pre_elem.style = '';
+
+      select_button_elem.innerHTML = 'Select All';
+      select_button_elem.onclick = function() { window.getSelection().selectAllChildren(code_elem); };
+
+      addTemplatedElement(h3_elem, title);
+      addTemplatedElement(code_elem, content);
+
+
+      // structure
+      div_elem.appendChild(h3_elem);
+      div_elem.appendChild(select_button_elem);
+      div_elem.appendChild(div_clear_elem);
+      div_elem.appendChild(pre_elem);
+
+      pre_elem.appendChild(code_elem);
+
+      return div_elem;
+    }
+
     $(document).ready(function() {
-
-      var template_data = {{ include.data | jsonify }};
-      var outfiles = template_data.outfiles;
-      var parameters = template_data.parameters;
-
       var plist = document.getElementById('parameter-list');
       var slist = document.getElementById('source-list');
-
-      var input_setters = [];
-      var template_outputs = [];
-
-      var input_sense = [];
-
-      var update;
 
       if(plist) {
         var table_elem = document.createElement('table');
@@ -63,7 +129,6 @@
 
           input_elem.setAttribute('type', 'text');
           input_elem.setAttribute('value', param.default);
-          input_elem.style = 'font-family: monospace;';
           td_field_elem.appendChild(input_elem);
 
           tr_elem.appendChild(td_label_elem);
@@ -82,34 +147,9 @@
 
       if(slist) {
         outfiles.forEach(function(outfile) {
-          var h3   = document.createElement('h3');
-          var pre  = document.createElement('pre');
-          var code = document.createElement('code');
+          var div_elem = createOutfileWidget(outfile.expression, escapeHtml(sources[outfile.id]));
 
-          h3.innerHTML = outfile.expression;
-          slist.appendChild(h3);
-
-          pre.style = 'padding: 0px; overflow-y: scroll; max-height: 500px; border: 1px solid gray;';
-
-          pre.appendChild(code);
-          slist.appendChild(pre);
-
-
-          var sink = {}
-          sink.initial = outfile.expression;
-          sink.set = function(str) {
-            h3.innerHTML = str;
-          }
-
-          template_outputs.push(sink);
-
-          var sink = {}
-          sink.initial = escapeHtml(sources[outfile.id]);
-          sink.set = function(str) {
-            code.innerHTML = str;
-          }
-
-          template_outputs.push(sink);
+          slist.appendChild(div_elem);
         });
       }
 
@@ -144,7 +184,7 @@
           {% endfor %}
         </div>
       </div>
-      <div align="center" style="width: 750px; position: absolute; left: 250px; border-left: 1px solid gray; padding-left: 20px;">
+      <div align="center" style="width: 750px; position: absolute; left: 250px; border-left: 1px solid gray; padding-left: 20px; padding-bottom: 20px;">
         <h3>{{ include.data.name }}</h3>
         <div id="parameter-list"></div>
         <div id="source-list" style="text-align: left;"></div>
