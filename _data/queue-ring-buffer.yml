@@ -1,0 +1,24 @@
+
+name: Ring Buffer Queue
+
+regex_script: 'queue.js'
+
+outfiles:
+  - expression: 'FILENAME.h'
+    template: queue.h
+    id: h_file
+  - expression: 'FILENAME.c'
+    template: queue.c
+    id: c_file
+
+parameters:
+  - name: Element Type
+    type: text
+    default: 'MyStruct'
+    input_id: element_type
+
+  - name: List Type (Base)
+    type: text
+    default: 'MyStructList'
+    input_id: list_type
+

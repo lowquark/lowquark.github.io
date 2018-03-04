@@ -1,0 +1,148 @@
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <style>
+body {
+  padding: 0px;
+  margin: 0px;
+}
+input {
+  font-family: monospace;
+}
+  </style>
+  <script>
+
+var sources = {};
+{% for outfile in include.data.outfiles %}
+{% capture code_file %}{{ outfile.template }}{% endcapture %}
+{% capture code %}{% include {{ code_file }} %}{% endcapture %}
+sources["{{ outfile.id }}"] = {{ code | jsonify }};
+{% endfor %}
+
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+$(document).ready(function() {
+
+  var template_data = {{ include.data | jsonify }};
+  var outfiles = template_data.outfiles;
+  var parameters = template_data.parameters;
+
+  var plist = document.getElementById('parameter-list');
+  var slist = document.getElementById('source-list');
+
+  var input_setters = [];
+  var template_outputs = [];
+
+  var input_sense = [];
+
+  var update;
+
+  if(plist) {
+    var table_elem = document.createElement('table');
+
+    parameters.forEach(function(param) {
+      var tr_elem       = document.createElement('tr');
+      var td_label_elem = document.createElement('td');
+      var td_field_elem = document.createElement('td');
+      var input_elem    = document.createElement('input');
+
+      td_label_elem.innerHTML = param.name;
+      td_label_elem.style     = 'text-align: right;';
+
+      input_elem.setAttribute('type', 'text');
+      input_elem.setAttribute('value', param.default);
+      input_elem.style = 'font-family: monospace;';
+      td_field_elem.appendChild(input_elem);
+
+      tr_elem.appendChild(td_label_elem);
+      tr_elem.appendChild(td_field_elem);
+      table_elem.appendChild(tr_elem);
+
+      input_setters.push(function(input) {
+        input[param.input_id] = input_elem.value;
+      });
+
+      $(input_elem).on('change keyup paste', function() { update(); });
+    });
+
+    plist.appendChild(table_elem);
+  }
+
+  if(slist) {
+    outfiles.forEach(function(outfile) {
+      var h3   = document.createElement('h3');
+      var pre  = document.createElement('pre');
+      var code = document.createElement('code');
+
+      h3.innerHTML = outfile.expression;
+      slist.appendChild(h3);
+
+      pre.style = 'padding: 0px; overflow-y: scroll; max-height: 500px; border: 1px solid gray; padding: 5px;';
+
+      pre.appendChild(code);
+      slist.appendChild(pre);
+
+
+      var sink = {}
+      sink.initial = outfile.expression;
+      sink.set = function(str) {
+        h3.innerHTML = str;
+      }
+
+      template_outputs.push(sink);
+
+      var sink = {}
+      sink.initial = escapeHtml(sources[outfile.id]);
+      sink.set = function(str) {
+        code.innerHTML = str;
+      }
+
+      template_outputs.push(sink);
+    });
+  }
+
+  update = function() {
+    input = {}
+    input_setters.forEach(function(setter) {
+      setter(input);
+    });
+    template_outputs.forEach(function(sink) {
+      sink.set(process_string(sink.initial, input, 'camelCase'));
+    });
+  }
+
+  {% capture script_file %}{{ include.data.regex_script }}{% endcapture %}
+  {% include {{ script_file }} %}
+
+  update();
+});
+
+  </script>
+</head>
+<body>
+  <div align="center">
+    <div style="text-align: left;">
+      <div style="width: 230px; text-align: right; position: absolute;">
+        <h3>Templates</h3>
+        <div id="template-list">
+          {% for template in site.data.c-templates %}
+          <a href="/c-templates/{{ template.id }}/">{{ template.name }}</a><br />
+          {% endfor %}
+        </div>
+      </div>
+      <div align="center" style="width: 750px; position: absolute; left: 250px; border-left: 1px solid gray; padding-left: 20px;">
+        <h3>{{ include.data.name }}</h3>
+        <div id="parameter-list"></div>
+        <div id="source-list" style="text-align: left;"></div>
+      </div>
+    </div>
+  </div>
+</body>
+
