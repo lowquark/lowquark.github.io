@@ -3,6 +3,6 @@
   id: queue-ring-buffer
 - name: circular list
   id: list-circular
-- name: hash map
-  id: map-hash
+- name: chaining hash map
+  id: map-chaining-hash
 

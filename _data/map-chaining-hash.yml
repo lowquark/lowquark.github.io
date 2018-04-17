@@ -1,0 +1,24 @@
+
+name: Chaining Hash map
+
+regex_script: 'c-template/map.js'
+
+outfiles:
+  - expression: 'FILENAME.h'
+    template: c-template/src/map/map.h
+    id: h_file
+
+  - expression: 'FILENAME.c'
+    template: c-template/src/map/map.c
+    id: c_file
+
+parameters:
+  - name: Name
+    type: text
+    default: 'map'
+    input_id: map_name
+
+  - name: Type
+    type: text
+    default: 'int'
+    input_id: element_type
