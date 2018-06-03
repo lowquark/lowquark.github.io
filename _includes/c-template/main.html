@@ -1,195 +1,187 @@
 
-<head>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">-->
 
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<!--<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>-->
 
-  <style>
-    body {
-      padding: 0px;
-      margin: 0px;
-    }
-    input {
-      font-family: monospace;
-    }
-    .outfile-widget h3 {
-      margin-top: 0px;
-      margin-bottom: 0px;
-      float: left;
-    }
-    .outfile-widget button {
-      margin-top: 0px;
-      margin-bottom: 0px;
-      float: right;
-    }
-    .outfile-widget .clear {
-      clear: both;
-      padding-bottom: 10px;
-    }
-    .outfile-widget pre {
-      margin: 0px;
-      padding: 0px;
-      overflow-y: scroll;
-      max-height: 500px;
-      border: 1px solid gray;
-    }
-    .outfile-widget {
-      margin: 0px;
-      padding: 0px;
-      padding-top: 10px;
-      padding-bottom: 20px;
-    }
-  </style>
+<style>
+  body {
+    padding: 0px;
+    margin: 0px;
+  }
+  input {
+    font-family: monospace;
+    /*background: none;*/
+    border: solid 1px black;
+    padding: 3px;
+    margin: 3px;
+  }
+  .outfile-widget h2 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    float: left;
+  }
+  .outfile-widget a {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    float: right;
+  }
+  .outfile-widget .clear {
+    clear: both;
+    padding-bottom: 10px;
+  }
+  .outfile-widget {
+    margin: 0px;
+    padding: 0px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+  }
+</style>
 
-  <script>
-    var sources = {};
-    {% for outfile in include.data.outfiles %}
-    {% capture code_file %}{{ outfile.template }}{% endcapture %}
-    {% capture code %}{% include {{ code_file }} %}{% endcapture %}
-    sources["{{ outfile.id }}"] = {{ code | jsonify }};
-    {% endfor %}
+<script>
+  var sources = {};
+  {% for outfile in include.data.outfiles %}
+  {% capture code_file %}{{ outfile.template }}{% endcapture %}
+  {% capture code %}{% include {{ code_file }} %}{% endcapture %}
+  sources["{{ outfile.id }}"] = {{ code | jsonify }};
+  {% endfor %}
 
-    var template_data = {{ include.data | jsonify }};
-    var outfiles = template_data.outfiles;
-    var parameters = template_data.parameters;
+  var template_data = {{ include.data | jsonify }};
+  var outfiles = template_data.outfiles;
+  var parameters = template_data.parameters;
 
-    var input_setters = [];
-    var template_outputs = [];
+  var input_setters = [];
+  var template_outputs = [];
 
-    var input_sense = [];
+  var input_sense = [];
 
-    var update;
+  var update;
 
-    function escapeHtml(unsafe) {
-      return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+  function escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-    function addTemplatedElement(elem, initial) {
-      var sink = {}
-      sink.initial = initial;
-      sink.set = function(str) { elem.innerHTML = str; }
-      template_outputs.push(sink);
-    }
+  function addTemplatedElement(elem, initial) {
+    var sink = {}
+    sink.initial = initial;
+    sink.set = function(str) { elem.innerHTML = str; }
+    template_outputs.push(sink);
+  }
 
-    function createOutfileWidget(title, content) {
-      var div_elem             = document.createElement('div');
-      var  h3_elem             = document.createElement('h3');
-      var  select_button_elem  = document.createElement('button');
-      var  div_clear_elem      = document.createElement('div');
-      var  pre_elem            = document.createElement('pre');
-      var   code_elem          = document.createElement('code');
+  function createOutfileWidget(title, content) {
+    var div_elem             = document.createElement('div');
+    var  h2_elem             = document.createElement('h2');
+    var  select_a_elem       = document.createElement('a');
+    var  div_clear_elem      = document.createElement('div');
+    var  pre_elem            = document.createElement('pre');
+    var   code_elem          = document.createElement('code');
 
-      // attributes / content
-      div_elem.className = 'outfile-widget';
+    // attributes / content
+    div_elem.className = 'outfile-widget';
 
-      div_clear_elem.className = 'clear';
+    div_clear_elem.className = 'clear';
 
-      code_elem.className = 'cpp';
+    code_elem.className = 'cpp';
 
-      select_button_elem.innerHTML = 'Select All';
-      select_button_elem.onclick = function() { window.getSelection().selectAllChildren(code_elem); };
+    select_a_elem.innerHTML = 'Select All';
+    select_a_elem.href = 'javascript:void(0)';
+    select_a_elem.onclick = function() { window.getSelection().selectAllChildren(code_elem); };
 
-      addTemplatedElement(h3_elem, title);
-      addTemplatedElement(code_elem, content);
+    addTemplatedElement(h2_elem, title);
+    addTemplatedElement(code_elem, content);
 
 
-      // structure
-      div_elem.appendChild(h3_elem);
-      div_elem.appendChild(select_button_elem);
-      div_elem.appendChild(div_clear_elem);
-      div_elem.appendChild(pre_elem);
+    // structure
+    div_elem.appendChild(h2_elem);
+    div_elem.appendChild(select_a_elem);
+    div_elem.appendChild(div_clear_elem);
+    div_elem.appendChild(pre_elem);
 
-      pre_elem.appendChild(code_elem);
+    pre_elem.appendChild(code_elem);
 
-      return div_elem;
-    }
+    return div_elem;
+  }
 
-    $(document).ready(function() {
-      var plist = document.getElementById('parameter-list');
-      var slist = document.getElementById('source-list');
+  $(document).ready(function() {
+    var plist = document.getElementById('parameter-list');
+    var slist = document.getElementById('source-list');
 
-      if(plist) {
-        var table_elem = document.createElement('table');
+    if(plist) {
+      var table_elem = document.createElement('table');
 
-        parameters.forEach(function(param) {
-          var tr_elem       = document.createElement('tr');
-          var td_label_elem = document.createElement('td');
-          var td_field_elem = document.createElement('td');
-          var input_elem    = document.createElement('input');
+      parameters.forEach(function(param) {
+        var tr_elem       = document.createElement('tr');
+        var td_label_elem = document.createElement('td');
+        var td_field_elem = document.createElement('td');
+        var input_elem    = document.createElement('input');
 
-          td_label_elem.innerHTML = param.name;
-          td_label_elem.style     = 'text-align: right;';
+        td_label_elem.innerHTML = param.name;
+        td_label_elem.style     = 'text-align: right;';
 
-          input_elem.setAttribute('type', 'text');
-          input_elem.setAttribute('value', param.default);
-          td_field_elem.appendChild(input_elem);
+        input_elem.setAttribute('type', 'text');
+        input_elem.setAttribute('value', param.default);
+        td_field_elem.appendChild(input_elem);
 
-          tr_elem.appendChild(td_label_elem);
-          tr_elem.appendChild(td_field_elem);
-          table_elem.appendChild(tr_elem);
+        tr_elem.appendChild(td_label_elem);
+        tr_elem.appendChild(td_field_elem);
+        table_elem.appendChild(tr_elem);
 
-          input_setters.push(function(input) {
-            input[param.input_id] = input_elem.value;
-          });
-
-          $(input_elem).on('change keyup paste', function() { update(); });
+        input_setters.push(function(input) {
+          input[param.input_id] = input_elem.value;
         });
 
-        plist.appendChild(table_elem);
-      }
+        $(input_elem).on('change keyup paste', function() { update(); });
+      });
 
-      if(slist) {
-        outfiles.forEach(function(outfile) {
-          var div_elem = createOutfileWidget(outfile.expression, escapeHtml(sources[outfile.id]));
+      plist.appendChild(table_elem);
+    }
 
-          slist.appendChild(div_elem);
-        });
-      }
+    if(slist) {
+      outfiles.forEach(function(outfile) {
+        var div_elem = createOutfileWidget(outfile.expression, escapeHtml(sources[outfile.id]));
 
-      update = function() {
-        input = {}
-        input_setters.forEach(function(setter) {
-          setter(input);
-        });
-        template_outputs.forEach(function(sink) {
-          sink.set(process_string(sink.initial, input, 'camelCase'));
-        });
-        $('pre code').each(function(i, block) {
-          hljs.highlightBlock(block);
-        });
-      }
+        slist.appendChild(div_elem);
+      });
+    }
 
-      {% capture script_file %}{{ include.data.regex_script }}{% endcapture %}
-      {% include {{ script_file }} %}
+    update = function() {
+      input = {}
+      input_setters.forEach(function(setter) {
+        setter(input);
+      });
+      template_outputs.forEach(function(sink) {
+        sink.set(process_string(sink.initial, input, 'camelCase'));
+      });
+      $('pre code').each(function(i, block) {
+        hljs.highlightBlock(block);
+      });
+    }
 
-      update();
-    });
-  </script>
-</head>
-<body>
-  <div align="center">
-    <div style="text-align: left;">
-      <div style="width: 230px; text-align: right; position: absolute;">
-        <h3>Templates</h3>
-        <div id="template-list">
-          {% for template in site.data.c-templates %}
-          <a href="/c-template/{{ template.id }}/">{{ template.name }}</a><br />
-          {% endfor %}
-        </div>
-      </div>
-      <div align="center" style="width: 750px; position: absolute; left: 250px; border-left: 1px solid gray; padding-left: 20px; padding-bottom: 20px;">
-        <h3>{{ include.data.name }}</h3>
-        <div id="parameter-list"></div>
-        <div id="source-list" style="text-align: left;"></div>
-      </div>
-    </div>
-  </div>
-</body>
+    {% capture script_file %}{{ include.data.regex_script }}{% endcapture %}
+    {% include {{ script_file }} %}
+
+    update();
+  });
+</script>
+
+<div align="center">
+<p>
+  Templates:
+  {% for template in site.data.c-templates %}
+  <a href="/c-template/{{ template.id }}/">{{ template.name }}</a>
+  {% endfor %}
+</p>
+
+<h1>{{ include.data.name }}</h1>
+
+<div id="parameter-list"></div>
+</div>
+
+<div id="source-list" style="text-align: left;"></div>
 

@@ -1,6 +1,6 @@
 ---
 permalink: /c-template/map-chaining-hash/
-layout: null
+layout: default
 ---
 
 {% include c-template/main.html data=site.data.map-chaining-hash %}

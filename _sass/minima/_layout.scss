@@ -3,18 +3,14 @@
  */
 .site-header {
   // Positioning context for the mobile navigation icon
-  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: #{$content-width};
 }
 
 .site-title {
-  font-family: 'Anton', sans-serif;
   font-size: 18pt;
   margin-bottom: 0;
-
-  &,
-  &:visited {
-    color: #AAA;
-  }
 }
 
 .site-nav {
@@ -182,10 +178,6 @@
   padding: 0px;
 }
 
-.page-heading {
-  @include relative-title-size(1.25);
-}
-
 .post-list {
   margin-left: 0;
   list-style: none;
@@ -197,7 +189,6 @@
 
 .post-meta {
   font-size: $small-font-size;
-  color: $grey-color;
 }
 
 .post-link {

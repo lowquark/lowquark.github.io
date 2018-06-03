@@ -26,9 +26,11 @@ body {
 }
 
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Anton', sans-serif;
+hr {
+  border: none;
+  border-top: 1px solid $text-color;
 }
+
 
 /**
  * Set `margin-bottom` to maintain vertical rhythm
@@ -95,7 +97,7 @@ h1, h2, h3, h4, h5, h6 {
  */
 a {
   color: $brand-color;
-  text-decoration: none;
+  text-decoration: underline;
 
   &:hover {
     color: darken($brand-color, 15%);
@@ -126,10 +128,7 @@ blockquote {
  */
 pre,
 code {
-  @include relative-font-size(0.9375);
-  border: 1px solid $grey-color-light;
-  border-radius: 3px;
-  background-color: #eef;
+  @include relative-font-size(0.87);
 }
 
 code {
@@ -137,11 +136,14 @@ code {
 }
 
 pre {
-  padding: 8px 12px;
+  padding: 4px 8px;
   overflow-x: auto;
+  overflow-y: auto;
+  color: #FFF;
+  border: none;
+  border-left: 3px solid #FFF;
 
   > code {
-    border: 0;
     padding-right: 0;
     padding-left: 0;
   }
@@ -153,16 +155,11 @@ pre {
  * Wrapper
  */
 .wrapper {
-  max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit} * 2));
-  max-width:         calc(#{$content-width} - (#{$spacing-unit} * 2));
+  max-width: #{$content-width};
   margin-right: auto;
-  margin-left: 0px;
+  margin-left: auto;
   padding: $spacing-unit;
   padding-bottom: $spacing-unit + 48;
-  background-color: #282828;
-  background-image: url(jag.png);
-  background-position: bottom right;
-  background-repeat: repeat-x;
   @extend %clearfix;
 }
 

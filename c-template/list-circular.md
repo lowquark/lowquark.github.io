@@ -1,6 +1,6 @@
 ---
 permalink: /c-template/list-circular/
-layout: null
+layout: default
 ---
 
 {% include c-template/main.html data=site.data.list-circular %}
